@@ -120,7 +120,7 @@ for inx_dna, inx_resseq in lst:
     codon_changed = False
     new_codons_lst = []
 
-    print("Restrictive sequence: {}".format(resseq))
+    print("\nRestrictive sequence: {}".format(resseq))
     print("Index on DNA: {}".format(inx_dna))
     print("Codons that belong to the r. sequence: {}".format(codons_str))
 
@@ -146,9 +146,15 @@ for inx_dna, inx_resseq in lst:
 
         for acid in acid_table:
             if usr_codon in acid:
-                print("\nHere are codons from same amino acid:\n")
                 temp_lst = acid.copy()
                 temp_lst.remove(usr_codon)
+                
+                if len(acid) == 1:
+                    print("Sorry, you have chosen a codon that cannot be changed :(")
+                    print("Please, restart the program")
+                    quit()
+
+                print("\nHere are codons from same amino acid:\n")
                 for temp_i, temp_item in enumerate(temp_lst):
                     print("{}. {}".format(temp_i, temp_item))
                 print("\nWhich of them you want to choose?")
