@@ -68,7 +68,6 @@ if usr2.lower() == 'y':
         print(seq)
     
     
-usr4 = input("\nDo you want to choose how to change restrictive sequences? (y/n):")
 
 lst = []
 
