@@ -1,3 +1,14 @@
+import os
+
+try: 
+    os.system('cls')
+finally:
+    os.system('clear')
+
+'''
+Table of amino acids and their codons. 
+Our program would refer to this table to keep track of codons that belong to the same group of acids.
+'''
 acid_table = [
              ["TTT", "TTC"], ["TTA", "TTG", "CTT", "CTC", "CTA", "CTG"], ["ATT", "ATC", "ATA"], ["ATG"], ["GTT", "GTC", "GTA", "GTG"],
              ["TCT", "TCC", "TCA", "TCG"], ["CCT", "CCC", "CCA", "CCG"], ["ACT", "ACC", "ACA", "ACG"], ["GCT", "GCC", "GCA", "GCG"],
@@ -7,15 +18,15 @@ acid_table = [
 
 OWN_DNA = False
 
+# Opening DNA sample and DNA restrictive sequences files
 with open("source/DNA.txt", "r") as DNA_fn:
     DNA_sam = DNA_fn.read()
 
-with open("source/DNA_res_sam", "r") as DNA_res_sam_fn:
+with open("source/DNA_res_sam.txt", "r") as DNA_res_sam_fn:
     DNA_resseq = DNA_res_sam_fn.read()
 
 
 
-lst = []
 i = 0
 
 print("--- DNA Restrictive Sequence Hidder V.0 ---")
@@ -32,22 +43,36 @@ if len(usr1) > 0:
         quit()
 
 
-
+# Converting DNA/Sequence list to a more sutable format
 DNA_resseq = DNA_resseq.replace('\n', '')
 DNA_resseq_lst = DNA_resseq.split(';')
 DNA_resseq_lst.remove('')
 DNA_sam = DNA_sam.replace('\n', '')
+DNA_sam = DNA_sam.upper()
 
 print("Here are default restrictive sequences: \n")
 for seq in DNA_resseq_lst:
     print(seq)
 
-print("\nDo you wish to add more? (y/n)")
-usr2 = input() 
+usr2 = input('\nDo you wish to add more restrictive sequences? (y/n): ') 
 
 if usr2.lower() == 'y':
-    print('Input sequences you want to add. Every sequence must be separate by ')
+    print('\nInput sequences you want to add. Every sequence must be separated by a blank space')
+    usr3 = input()
+    usr3 = usr3.strip().upper()
+    usr3_lst = usr3.split(' ')    
+    DNA_resseq_lst.extend(usr3_lst)
 
+    print("Your new sequence list:\n")
+    for seq in DNA_resseq_lst:
+        print(seq)
+    
+    
+usr4 = input("\nDo you want to choose how to change restrictive sequences? (y/n):")
+
+lst = []
+
+# Finding and indexing restrictive sequence on DNA
 for i_resseq, resseq in enumerate(DNA_resseq_lst):
     while True:
         if i == 0:
@@ -63,10 +88,12 @@ for i_resseq, resseq in enumerate(DNA_resseq_lst):
         if i == 0:
             i = 1
     
-new_sam = list(DNA_sam)
+new_sam = list(DNA_sam) 
+print("\n\nWe found {} matches:\n".format(len(lst)))
 
 for inx_dna, inx_resseq in lst:
 
+    #Identifying codons that belong to restrictive sequence
     cod_start = inx_dna - (inx_dna % 3)
     resseq = DNA_resseq_lst[inx_resseq]
     inx_dnaend = len(resseq) + inx_dna - 1
@@ -75,6 +102,8 @@ for inx_dna, inx_resseq in lst:
     
     codons_lst = []
     codon_temp = []
+
+    #Separating codons to a list of individual codons
     for i_gen, gen in enumerate(codons_str):
         codon_temp.append(gen)
         if not (i_gen + 1) % 3:
@@ -85,12 +114,13 @@ for inx_dna, inx_resseq in lst:
     codon_changed = False
     new_codons_lst = []
 
+    #Changing codons to hide restrictive sequence
     for codon_i, codon in enumerate(codons_lst):
         new_codon = codon
         for acid in acid_table:
             if codon in acid:
 
-                if len(acid) == 1 or codon_changed or not codon_i:
+                if len(acid) == 1 or codon_changed or codon_i == 0: # First codon would not be changed. For preventing bugs
                     break
                 
                 temp_lst = acid.copy()
@@ -102,13 +132,22 @@ for inx_dna, inx_resseq in lst:
 
     new_codons = ''.join(new_codons_lst)
 
+    # Output for user
     new_sam[cod_start:cod_end + 1] = new_codons
-    print("success")
+    print("Restrictive sequence: {}".format(resseq))
+    print("Index on DNA: {}".format(inx_dna))
+    print("Codons that belong to the r. sequence: {}".format(codons_str))
+    print("Proporsed changes to hide r. sequence {}".format(new_codons))
+    print('\n')
     
-    # print("inx_dna: {}, resseq: {}, inx_dnaend: {}, cod_start: {}, cod_end: {}, codons: {}, codons list: {}, new codons lst: {}, "
+    # (FOR DEBUGGING) print("inx_dna: {}, resseq: {}, inx_dnaend: {}, cod_start: {}, cod_end: {}, codons: {}, codons list: {}, new codons lst: {}, "
     #         .format(inx_dna, resseq, inx_dnaend, cod_start, cod_end, codons_str, codons_lst, new_codons, new_sam[cod_start:cod_end + 1]))
 
 new_sam = ''.join(new_sam)
 
-with open("results/DNA_results", "w") as res:
+# Saving everything to a txt file
+with open("results/DNA_results.txt", "w") as res:
     res.write(new_sam)
+
+print("\nSuccess!")
+print("Changes to your DNA sample have been saved to 'results/DNA_results.txt'")
